@@ -2,7 +2,6 @@
  *
  * Konfigurasi Gulp.js
  * @author [Boed Winangun]
- * @version [1.0.1]
  * 
  */
 
