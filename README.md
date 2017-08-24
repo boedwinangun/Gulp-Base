@@ -1,26 +1,45 @@
 # Gulp-Base
 Gulp Automation
+- Gulp Build system
+- SASS for CSS preprocessing.
+- Image minification.
+- BrowserSync server.
+- JsHint
+- Notifikasi Error Reporting `Test: Windows 7 Ultimate`
 
-Notifikasi
-- Agar notifikasi berjalan lancar pada OS windows lakukan 2 langkah berikut :
-	- Install Growl for Windows
-	- Jalankan Growl
+## Notifikasi
+Agar notifikasi berjalan lancar pada OS windows lakukan 2 langkah berikut :
+- Install Growl for Windows [http://www.growlforwindows.com/gfw/default.aspx]
+- Aktifkan Growl.
+`Test: Windows 7 Ultimate`
 
-Konfigurasi NPM
-- Buka CMD pada windows
-- Masuk ke dalam folder root, contoh :
-	C:\xampp\htdocs\gulp-base
-- Install Node NPM yang ada pada file package.json dengan perintah berikut :
-	npm install
+## Usage
+Beberapa langkah yang harus dilakukan:
 
-Jalankan Gulp.js
-- Jalankan Gulp-Base dengan perintah berikut :
-	gulp
-- Jika projek siap di produksi, gunakan perintah berikut :
-	gulp deployZip
-- Terima Kasih
+### 1. Clone the Repo:
+
+```sh
+$ git clone https://github.com/boedwinangun/gulp-base.git
+```
+
+### 2. Install dependencies:
+
+```sh
+$ npm install
+```
+
+### 3. Jalankan
+
+```sh
+$ gulp
+```
+
+
+*Note: jika projek siap untuk di produksi gunakan perintah `gulp deployZip`*
+
+
 
  
- >> Artikel [https://solvedia.blogspot.co.id/2017/08/javascript-langkah-mudah-otomatisasi.html] 
+ >> Artikel [https://solvedia.blogspot.co.id/2017/08/javascript-langkah-mudah-otomatisasi.html]  
  
- >> Growl for Windows [http://www.growlforwindows.com/gfw/default.aspx] 
+ 
