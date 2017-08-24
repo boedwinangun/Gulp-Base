@@ -3,7 +3,7 @@ Gulp Automation
 - Gulp Build system
 - SASS for CSS preprocessing.
 - Image minification.
-- BrowserSync server.
+- BrowserSync server, Sebagai Webserver Local dan sinkronisasi browser beserta perangkat lain (ex: mobile).
 - JsHint.
 - Notifikasi Error Reporting With Growl. `Test: Windows 7 Ultimate`
 
@@ -24,12 +24,12 @@ Beberapa langkah yang harus dilakukan:
 node -v
 ```
 
-### 1. Clone the Repo:
+### 2. Clone the Repo:
 ```sh
 $ git clone https://github.com/boedwinangun/gulp-base.git
 ```
 
-### 2. Install dependencies:
+### 3. Install dependencies:
 Arahkan ke folder root gulp-base dengan command line dan jalankan perintah berikut :
 ```sh
 $ npm install

@@ -2,7 +2,7 @@
  *
  * Konfigurasi Gulp.js
  * @author [Boed Winangun]
- * @version [1.0]
+ * @version [1.0.1]
  * 
  */
 
@@ -10,11 +10,11 @@ var gulp    	= require('gulp'),
 	browserSync = require('browser-sync').create(),
 	reload      = browserSync.reload,
 
-// This will keeps pipes working after error event
+// error event
 	plumber     = require('gulp-plumber'),
 
 
-// Used in error reporter object
+// error reporter object
 	map         = require('map-stream');
 	events      = require('events');
 	notify      = require('gulp-notify'),
@@ -29,7 +29,7 @@ var gulp    	= require('gulp'),
 	jshint      = require('gulp-jshint'),
   	stylish     = require('jshint-stylish'),
 
-// Deploy
+// Build
 	clean       = require('gulp-clean'),
 	cssnano     = require('gulp-cssnano'),
 	concat      = require('gulp-concat'),
@@ -40,7 +40,7 @@ var gulp    	= require('gulp'),
 	zip         = require('gulp-zip');
 
 
-// error reporter SCSS
+// Task error reporter SCSS
 var reportError = function (error) { 
     var lineNumber = (error.lineNumber) ? 'LINE ' + error.lineNumber + ' -- ' : '';
     var pluginName = (error.plugin) ? ': ['+error.plugin+']' : '['+currentTask+']';
@@ -65,7 +65,7 @@ var reportError = function (error) {
 }
 
 
-// Compile SCSS
+// Task Compile SCSS
 gulp.task('scss', function(){
 	return gulp.src('./app/scss/**.scss')
 	.pipe(plumber({
@@ -77,7 +77,7 @@ gulp.task('scss', function(){
 });
 
 
-// error reporter JSHint
+// Task error reporter JSHint
 gulp.task('jshint', function(){
 	return gulp.src(['./app/js/**/*.js'])
 	.pipe(plumber())
@@ -88,7 +88,7 @@ gulp.task('jshint', function(){
 	        var msg = [];
 	        file.jshint.results.forEach( function ( err, i ) {
 	            if ( err ) {
-	                // Error message
+	                // Pesan Error 
 	                msg.push(
 	                    '#' + ( i + 1 ) + '\t' + 'Line: ' + err.error.line + '\t' + path.basename(file.path) + '\n' +
 	                    err.error.reason
@@ -98,7 +98,7 @@ gulp.task('jshint', function(){
 	        emitter.emit('error', new Error('\n' + msg.join('\n')));
 	    }
 	    callback( null, file );
-	})) // If error pop up a notify alert
+	})) // Jika ada error tampilkan notif pop up
     .on('error', notify.onError(function (error) {
       	return error.message;
     }))
@@ -106,14 +106,14 @@ gulp.task('jshint', function(){
 });
 
 
-// Task Clean Build Directory
+// Task Clean folder build
 gulp.task('cleanBuild', function(){
 	return gulp.src('build', {read: false})
 	.pipe(clean());
 });
 
 
-// produksi ke folder Build
+// Task produksi ke folder Build
 gulp.task('build',['cleanBuild'], function(){
 	// optimasi css
 	var cssOptimize = gulp.src('app/css/*.css')
@@ -144,7 +144,7 @@ gulp.task('build',['cleanBuild'], function(){
 })
 
 
-// Produksi ke file Zip
+// Task Produksi ke file Zip
 gulp.task('prod',['build'], function(){
 	var zipNow = gulp.src('build/**')
 		.pipe(zip('template.zip'))
@@ -152,9 +152,11 @@ gulp.task('prod',['build'], function(){
 })
 
 
-// Task Local Webserver dan sinkronisasi dengan browser
+// Task Local Webserver dan sinkronisasi browser, perangkat lain (ex: mobile)
 gulp.task('default', function(){
 	browserSync.init({
+		// buka projek di Google Chrome
+		browser: "chrome",
 		server: {
 			baseDir: "./app"
 		}
