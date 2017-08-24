@@ -1,7 +1,7 @@
 // Hello.
 
 function main() {
-  return 'Hello, Gulp!';
+  return 'Hello, Gulp!'
 }
 
 main();

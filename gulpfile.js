@@ -20,7 +20,7 @@ var gulp    	= require('gulp'),
 	notify      = require('gulp-notify'),
 	emitter     = new events.EventEmitter();
 	path        = require('path'),
-	gutil       = require('gulp-util'),
+	gutil       = require('gulp-util'), 
 
 // CSS
 	scss        = require('gulp-sass'),
@@ -49,6 +49,8 @@ var reportError = function (error) {
         title: 'Task Failed '+ pluginName,
         message: lineNumber + 'Lihat console.'
     }).write(error);
+
+    gutil.beep();
   
     var report = '';
     var chalk = gutil.colors.white.bgRed;
@@ -80,7 +82,7 @@ gulp.task('jshint', function(){
 	return gulp.src(['./app/js/**/*.js'])
 	.pipe(plumber())
     .pipe(jshint())
-    .pipe(jshint.reporter(stylish)) // Console output
+    .pipe(jshint.reporter(stylish, {beep: true})) // Console output
     .pipe( map( function ( file, callback ) {
 	    if ( ! file.jshint.success ) {
 	        var msg = [];
@@ -111,8 +113,8 @@ gulp.task('cleanBuild', function(){
 });
 
 
-// Deploy ke folder Build
-gulp.task('deploy',['cleanBuild'], function(){
+// produksi ke folder Build
+gulp.task('build',['cleanBuild'], function(){
 	// optimasi css
 	var cssOptimize = gulp.src('app/css/*.css')
 		.pipe(cssnano())
@@ -142,10 +144,10 @@ gulp.task('deploy',['cleanBuild'], function(){
 })
 
 
-// Deploy ke file Zip
-gulp.task('deployZip',['deploy'], function(){
+// Produksi ke file Zip
+gulp.task('prod',['build'], function(){
 	var zipNow = gulp.src('build/**')
-		.pipe(zip('deploy.zip'))
+		.pipe(zip('template.zip'))
 		.pipe(gulp.dest('build'));
 })
 
