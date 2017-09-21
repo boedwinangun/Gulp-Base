@@ -5,162 +5,189 @@
  *
  */
 
-var gulp    	= require('gulp'),
-	browserSync = require('browser-sync').create(),
-	reload      = browserSync.reload,
+var gulp        = require('gulp'),
+browserSync = require('browser-sync').create(),
+reload      = browserSync.reload,
 
 // error event
-	plumber     = require('gulp-plumber'),
+plumber     = require('gulp-plumber'),
 
 
 // error reporter object
-	map         = require('map-stream');
-	events      = require('events');
-	notify      = require('gulp-notify'),
-	emitter     = new events.EventEmitter();
-	path        = require('path'),
-	gutil       = require('gulp-util'),
+map         = require('map-stream');
+events      = require('events');
+notify      = require('gulp-notify'),
+emitter     = new events.EventEmitter();
+path        = require('path'),
+gutil       = require('gulp-util'),
 
 // CSS
-	scss        = require('gulp-sass'),
+scss        = require('gulp-sass'),
 
 // JS
-	jshint      = require('gulp-jshint'),
-  	stylish     = require('jshint-stylish'),
+jshint      = require('gulp-jshint'),
+  stylish     = require('jshint-stylish'),
 
 // Dist
-	clean       = require('gulp-clean'),
-	cssnano     = require('gulp-cssnano'),
-	concat      = require('gulp-concat'),
-	uglify      = require('gulp-uglify'),
-	imagemin    = require('gulp-imagemin'),
-	htmlmin     = require('gulp-htmlmin'),
-	merge       = require('merge-stream'),
-	zip         = require('gulp-zip');
+clean       = require('gulp-clean'),
+cssnano     = require('gulp-cssnano'),
+concat      = require('gulp-concat'),
+uglify      = require('gulp-uglify'),
+header      = require('gulp-header'),
+imagemin    = require('gulp-imagemin'),
+htmlmin     = require('gulp-htmlmin'),
+merge       = require('merge-stream'),
+zip         = require('gulp-zip'),
+
+paths = {
+    root: './',
+    source: {
+        root: 'build/src/',
+        styles: 'build/src/scss/**/*.scss',
+        scripts: 'build/src/js/**/*.js'
+    },
+    build: {
+        root: 'build/',
+        styles: 'build/css/',
+        scripts: 'build/js/',
+        fonts: 'build/fonts/',
+        images: 'build/images/'
+    },
+    dist: {
+        root: 'dist/',
+        styles: 'dist/css/',
+        scripts: 'dist/js/',
+        fonts: 'dist/fonts/',
+        images: 'dist/images/'
+    },
+    pkg: require('./bower.json'),
+    banner: [
+        '/**',
+        ' * Boed Winangun <%= pkg.version %>',
+        ' * <%= pkg.description %>',
+        ' * ',
+        ' * <%= pkg.homepage %>',
+        ' * ',
+        ' * Copyright <%= date.year %>, <%= pkg.author %>',
+        ' * ',
+        ' * Released on: <%= date.month %> <%= date.day %>, <%= date.year %>',
+        ' */',
+        ''].join('\n'),
+    date: {
+        year: new Date().getFullYear(),
+        month: ('January February March April May June July August September October November December').split(' ')[new Date().getMonth()],
+        day: new Date().getDate()
+    }
+}
 
 
 // Task error reporter SCSS
 var reportError = function (error) {
-    var lineNumber = (error.lineNumber) ? 'LINE ' + error.lineNumber + ' -- ' : '';
-    var pluginName = (error.plugin) ? ': ['+error.plugin+']' : '['+currentTask+']';
+var lineNumber = (error.lineNumber) ? 'LINE ' + error.lineNumber + ' -- ' : '';
+var pluginName = (error.plugin) ? ': ['+error.plugin+']' : '['+currentTask+']';
 
-    notify({
-        title: 'Task Failed '+ pluginName,
-        message: lineNumber + 'Lihat console.'
-    }).write(error);
+notify({
+    title: 'Task Failed '+ pluginName,
+    message: lineNumber + 'Lihat console.'
+}).write(error);
 
-    gutil.beep();
+gutil.beep();
 
-    var report = '';
-    var chalk = gutil.colors.white.bgRed;
+var report = '';
+var chalk = gutil.colors.white.bgRed;
 
-    report += chalk('TASK:') + pluginName+'\n';
-    report += chalk('ERROR:') + ' ' + error.message + '\n';
-    if (error.lineNumber) { report += chalk('LINE:') + ' ' + error.lineNumber + '\n'; }
-    if (error.fileName) { report += chalk('FILE:') + ' ' + error.fileName + '\n'; }
+report += chalk('TASK:') + pluginName+'\n';
+report += chalk('ERROR:') + ' ' + error.message + '\n';
+if (error.lineNumber) { report += chalk('LINE:') + ' ' + error.lineNumber + '\n'; }
+if (error.fileName) { report += chalk('FILE:') + ' ' + error.fileName + '\n'; }
 
-    console.error(report);
-    this.emit('end');
+console.error(report);
+this.emit('end');
 }
 
 
 // Task Compile SCSS
-gulp.task('scss', function(){
-	return gulp.src('./app/scss/**.scss')
-	.pipe(plumber({
-	    errorHandler: reportError
-	}))
-	.pipe(scss())
-	.pipe(gulp.dest('./app/css'))
-	.pipe(reload({stream: true}));
+gulp.task('styles', function(){
+return gulp.src(paths.source.styles)
+    .pipe(plumber({
+        errorHandler: reportError
+    }))
+    .pipe(scss())
+    .pipe(gulp.dest(paths.build.styles))
+    .pipe(reload({stream: true}));
 });
 
 
-// Task error reporter JSHint
-gulp.task('jshint', function(){
-	return gulp.src(['./app/js/**/*.js'])
-	.pipe(plumber())
+// // Task Compile script
+gulp.task('scripts', function(){
+gulp.src(paths.source.root + 'js/functions.js')
+    .pipe(plumber())
     .pipe(jshint())
-    .pipe(jshint.reporter(stylish, {beep: true}))
-    .pipe( map( function ( file, callback ) {
-	    if ( ! file.jshint.success ) {
-	        var msg = [];
-	        file.jshint.results.forEach( function ( err, i ) {
-	            if ( err ) {
-	                // Pesan Error
-	                msg.push(
-	                    '#' + ( i + 1 ) + '\t' + 'Line: ' + err.error.line + '\t' + path.basename(file.path) + '\n' +
-	                    err.error.reason
-	                );
-	            }
-	        });
-	        emitter.emit('error', new Error('\n' + msg.join('\n')));
-	    }
-	    callback( null, file );
-	})) // Jika ada error tampilkan notif pop up
-    .on('error', notify.onError(function (error) {
-      	return error.message;
-    }))
-	.pipe(reload({stream: true}));
+    .pipe(jshint.reporter(stylish))
+    .pipe(gulp.dest(paths.build.scripts));
+    
+gulp.src(paths.source.root + 'js/plugins/*.js')
+    .pipe(concat('plugins.js'))
+    .pipe(gulp.dest(paths.build.scripts))
+    .pipe(reload({stream: true}));
 });
 
 
 // Task Clean folder dist
 gulp.task('cleanDist', function(){
-	return gulp.src('dist', {read: false})
-	.pipe(clean());
+return gulp.src(paths.dist.root, {read: false})
+    .pipe(clean());
 });
 
 
 // Task produksi ke folder Dist
 gulp.task('dist',['cleanDist'], function(){
-	// optimasi css
-	var cssOptimize = gulp.src('app/css/*.css')
-		.pipe(cssnano())
-		.pipe(gulp.dest('dist/css'));
+// optimasi css
+var cssOptimize = gulp.src(paths.build.styles + '*.css')
+    .pipe(cssnano())
+    .pipe(header(paths.banner, { pkg : paths.pkg, date: paths.date }))
+    .pipe(gulp.dest(paths.dist.styles));
 
-	// Menggabungkan semua file js dan optimasi
-	var jsOptimize = gulp.src('app/js/*.js')
-		.pipe(concat('main.js'))
-		.pipe(uglify())
-		.pipe(gulp.dest('dist/js'));
+// Menggabungkan semua file js dan optimasi
+var jsOptimize = gulp.src(paths.build.scripts + '*.js')
+    .pipe(uglify())
+    .pipe(header(paths.banner, { pkg : paths.pkg, date: paths.date }))
+    .pipe(gulp.dest(paths.dist.scripts));
 
-	// Optimasi images
-	var imgOptimize = gulp.src('app/images/*')
-		.pipe(imagemin())
-		.pipe(gulp.dest('dist/images'));
+// Optimasi html
+var html = gulp.src(paths.build.root + '*.html')
+    .pipe(gulp.dest(paths.dist.root));
 
-	// Optimasi html
-	var htmlOptimize = gulp.src('app/*.html')
-		.pipe(htmlmin({collapseWhitespace: true}))
-		.pipe(gulp.dest('dist'));
+// Optimasi images
+var images = gulp.src(paths.build.images + '**/*')
+    .pipe(gulp.dest(paths.dist.images));
 
-	// Optimasi fonts
-	var fonts = gulp.src('app/fonts/**')
-		.pipe(gulp.dest('dist/fonts'));
+// Optimasi fonts
+var fonts = gulp.src(paths.build.fonts + '**')
+    .pipe(gulp.dest(paths.dist.fonts));
 
-	return merge(cssOptimize,jsOptimize,imgOptimize,htmlOptimize,fonts);
+return merge(cssOptimize,jsOptimize,html,images,fonts);
 })
 
 
 // Task Produksi ke file Zip
 gulp.task('distZip',['dist'], function(){
-	var zipNow = gulp.src('dist/**')
-		.pipe(zip('template.zip'))
-		.pipe(gulp.dest('dist'));
+var zipNow = gulp.src(paths.dist.root + '**')
+    .pipe(zip('template.zip'))
+    .pipe(gulp.dest(paths.dist.root));
 })
 
 
 // Task Local Webserver dan sinkronisasi browser, perangkat lain (ex: mobile)
 gulp.task('default', function(){
-	browserSync.init({
-		// buka projek di Google Chrome
-		browser: "chrome",
-		server: {
-			baseDir: "./app"
-		}
-	});
-	gulp.watch('./app/**/*').on('change', reload);
-	gulp.watch('./app/scss/**/*.scss',['scss']);
-    gulp.watch(['./app/js/**/*.js'], ['jshint']);
+browserSync.init({
+    // buka projek di Google Chrome
+    browser: "chrome",
+    server: {
+        baseDir: paths.build.root
+    }
+});
+gulp.watch(paths.build.root + '**/*').on('change', reload);
+gulp.watch(paths.source.styles,['styles']);
+gulp.watch(paths.source.scripts,['scripts']);
 });
